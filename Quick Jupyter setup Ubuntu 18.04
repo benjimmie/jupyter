@@ -1,0 +1,45 @@
+### 1. Install pip & jupyter 
+
+```
+#apt install python3-pip
+#pip install jupyter --upgrade --proxy http://w.x.y.z
+#pip install ipython==6.5  --proxy http://w.x.y.z
+```
+### 2. Setup the UFW to allow access to jupyter
+```
+#ufw allow from 10.150.62.0/24 proto tcp to any port 8080 comment 'Allow from IT/IS Subnet to Jupyter'
+```
+
+### 3. Create a file `jupyter.service` 
+```
+# mkdir /usr/lib/systemd/system/
+# vim  /usr/lib/systemd/system/jupyter.service
+```
+as below 
+
+```
+[Unit]
+Description=Jupyter Notebook
+
+[Service]
+Type=simple
+PIDFile=/run/jupyter.pid
+#Jupyter Notebook location
+ExecStart=/usr/local/bin/jupyter-notebook --config=/home/ben/.jupyter/jupyter_notebook_config.py
+User=ben
+Group=ben
+WorkingDirectory=/home/ben/
+Restart=always
+RestartSec=10
+#KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+```
+### 4. Enable the service
+```
+#systemctl enable jupyter.service
+#systemctl daemon-reload
+#systemctl restart jupyter.service
+#systemctl status jupyter.service
+```

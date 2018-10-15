@@ -1,0 +1,29 @@
+### 1. Install TFTP
+```
+#apt update; sudo apt install tftp-hpa tftpd-hpa
+```
+
+### 2. Edit the TFTP config file...
+```
+#vim /etc/default/tftpd-hpa
+```
+ 
+with this configuration
+```
+RUN_DAEMON="yes"
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/var/lib/tftpboot"
+TFTP_ADDRESS=":69"
+TFTP_OPTIONS="--secure --create"
+```
+ 
+### 3. Configure the permissions for the TFTP root folder
+```
+#chmod 755 /var/lib/tftpboot
+#chown tftp:tftp /var/lib/tftpboot
+```
+ 
+### 4. Restart the TFTP service
+```
+#service tftpd-hpa restart
+```

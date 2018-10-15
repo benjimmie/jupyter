@@ -1,0 +1,24 @@
+### Install SciPy 
+
+SciPy (pronounced “Sigh Pie”) is a Python-based ecosystem of open-source software for mathematics, science, and engineering. In particular, these are some of the core packages:
+
+- NumPy: Base N-dimensional array package
+- SciPy library: Fundamental library for scientific computing
+- Matplotlib: Comprehensive 2D Plotting
+- IPython: Enhanced Interactive Console
+- Sympy: Symbolic mathematics
+- Pandas: Data structures & analysis
+
+via pip 
+Installing via pip
+```
+#pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
+```
+
+
+via package manager
+```
+#apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+```
+
+

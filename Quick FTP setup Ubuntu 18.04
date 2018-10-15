@@ -1,0 +1,95 @@
+### Step 1 — Installing vsftpd
+updating our package list and installing the vsftpd daemon
+```
+# apt update
+# apt install vsftpd
+# cp /etc/vsftpd.conf /etc/vsftpd.conf.orig
+```
+
+### Step 2 — Opening the Firewall
+Add rules to UFW for FTP
+```
+# ufw allow 20/tcp comment 'Allow to FTP'
+# ufw allow 21/tcp comment 'Allow to FTP'
+# ufw allow 990/tcp comment 'Allow to FTP when we enable TLS'
+# ufw allow 40000:50000/tcp comment 'Allow to FTP range of passive port we set in config'
+```
+
+### Step 3 — Preparing the User Directory
+Add the FTP user:
+```
+# adduser tomato
+```
+create the user dir, set the permissions
+```
+# mkdir /home/tomato/ftp
+# chown nobody:nogroup /home/tomato/ftp
+# chmod a-w /home/tomato/ftp
+# mkdir /home/tomato/ftp/files
+# chown tomato:tomato /home/sammy/ftp/files
+# ls -la /home/tomato/ftp/
+total 12
+dr-xr-xr-x 3 nobody nogroup 4096 Oct  3 10:11 .
+drwxr-xr-x 3 tomato tomato  4096 Oct  3 10:09 ..
+drwxr-xr-x 2 tomato tomato  4096 Oct  3 13:39 files
+```
+create a test file
+```
+echo "vsftpd test file" | sudo tee /home/tomato/ftp/files/test.txt
+```
+
+### Step 4 — Configuring FTP Access
+Allow a single user with a local shell account to connect with FTP. The two key settings for this are already set in vsftpd.conf. 
+Edit the config file ...
+```
+#vim /etc/vsftpd.conf
+```
+to verify that the settings in your configuration match those below:
+```
+# Allow anonymous FTP? (Disabled by default).
+anonymous_enable=NO
+#
+# Uncomment this to allow local users to log in.
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+user_sub_token=$USER
+local_root=/home/$USER/ftp
+pasv_min_port=40000
+pasv_max_port=50000
+userlist_enable=YES
+userlist_file=/etc/vsftpd.userlist
+userlist_deny=NO
+```
+
+`userlist_deny` toggles the logic: When it is set to `YES`, users on the list are denied FTP access. When it is set to `NO`, only users on the list are allowed access. Add our user to `/etc/vsftpd.userlist`. Use the `-a` flag to append to the file:
+```
+# echo "tomato" | sudo tee -a /etc/vsftpd.userlist
+# cat /etc/vsftpd.userlist
+# tomato
+```
+
+### Step 5 — Testing FTP Access
+```
+C:\>ftp y.x.y.z
+Connected to y.x.y.z.
+220 (vsFTPd 3.0.3)
+User (y.x.y.z:(none)): tomato
+331 Please specify the password.
+Password:
+230 Login successful.
+ftp> cd files
+250 Directory successfully changed.
+ftp> get test.txt
+200 PORT command successful. Consider using PASV.
+150 Opening BINARY mode data connection for test.txt (17 bytes).
+226 Transfer complete.
+ftp: 17 bytes received in 0.00Seconds 17.00Kbytes/sec.
+ftp> put test.txt upload.txt
+200 PORT command successful. Consider using PASV.
+150 Ok to send data.
+226 Transfer complete.
+ftp: 17 bytes sent in 0.00Seconds 17.00Kbytes/sec.
+ftp> bye
+221 Goodbye.
+```
